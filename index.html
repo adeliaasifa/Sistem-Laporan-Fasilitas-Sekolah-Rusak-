@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Laporan Fasilitas Sekolah</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+    header {
+      background: #123c69;
+      color: white;
+      padding: 22px 16px;
+      text-align: center;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 12px;
+      background: white;
+    }
+    button, .nav-button {
+      background: #1769aa;
+      color: white;
+      border: 0;
+      padding: 11px 15px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover { opacity: .88; }
+    .danger { background: #b91c1c; }
+    main {
+      max-width: 900px;
+      margin: 24px auto;
+      padding: 0 14px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 3px 12px #0000000c;
+    }
+    h2 { color: #123c69; margin-top: 0; }
+    label {
+      display: block;
+      margin-top: 13px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 11px;
+      margin-top: 6px;
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      font-size: 15px;
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    .full { width: 100%; margin-top: 16px; }
+    .hidden { display: none !important; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .stat {
+      padding: 17px;
+      border-radius: 10px;
+      background: #e0edff;
+    }
+    .stat strong {
+      display: block;
+      font-size: 26px;
+      margin-top: 7px;
+    }
+    .report {
+      border: 1px solid #e2e8f0;
+      border-radius: 9px;
+      padding: 15px;
+      margin: 12px 0;
+      overflow-wrap: anywhere;
+    }
+    .report p { line-height: 1.5; }
+    .muted { color: #64748b; font-size: 13px; }
+    #message, #loginMessage {
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+    footer {
+      text-align: center;
+      padding: 22px;
+      color: #64748b;
+      font-size: 13px;
+    }
+    @media (min-width: 600px) {
+      .stats { grid-template-columns: repeat(4, 1fr); }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>🏫 Laporan Fasilitas Sekolah</h1>
+  <p>Laporkan kerusakan agar segera ditindaklanjuti</p>
+</header>
+
+<nav>
+  <button type="button" id="showReport">Formulir Siswa</button>
+  <button type="button" id="showLogin">Login Pengelola</button>
+</nav>
+
+<main>
+  <!-- HALAMAN SISWA -->
+  <section id="studentPage" class="card">
+    <h2>Formulir Laporan Kerusakan</h2>
+    <p>Isi data dengan benar. Laporan hanya dapat dilihat
+       oleh guru dan operator yang berwenang.</p>
+
+    <form id="reportForm">
+      <label for="studentName">Nama siswa</label>
+      <input id="studentName" maxlength="80" required>
+
+      <label for="studentClass">Kelas</label>
+      <input id="studentClass" maxlength="30"
+             placeholder="Contoh: XI TKJ 1" required>
+
+      <label for="facility">Fasilitas yang rusak</label>
+      <select id="facility" required>
+        <option value="">-- Pilih fasilitas --</option>
+        <option>Komputer</option>
+        <option>Jaringan internet</option>
+        <option>Proyektor</option>
+        <option>Meja atau kursi</option>
+        <option>Lampu</option>
+        <option>Pintu atau jendela</option>
+        <option>Toilet</option>
+        <option>Fasilitas lainnya</option>
+      </select>
+
+      <label for="location">Lokasi kerusakan</label>
+      <input id="location" maxlength="100"
+             placeholder="Contoh: Lab TKJ" required>
+
+      <label for="description">Deskripsi kerusakan</label>
+      <textarea id="description" maxlength="1000"
+        placeholder="Jelaskan kerusakan yang ditemukan"
+        required></textarea>
+
+      <button class="full" type="submit" id="submitReport">
+        Kirim Laporan
+      </button>
+      <p id="message" role="status"></p>
+    </form>
+  </section>
+
+  <!-- HALAMAN LOGIN -->
+  <section id="loginPage" class="card hidden">
+    <h2>Login Guru / Operator</h2>
+    <p class="muted">
+      Gunakan akun yang telah dibuat oleh administrator.
+    </p>
+    <form id="loginForm">
+      <label for="email">Email akun</label>
+      <input id="email" type="email" autocomplete="username"
+             required>
+
+      <label for="password">Kata sandi</label>
+      <input id="password" type="password"
+             autocomplete="current-password" required>
+
+      <button class="full" type="submit">Login</button>
+      <p id="loginMessage" role="status"></p>
+    </form>
+  </section>
+
+  <!-- DASHBOARD PENGELOLA -->
+  <section id="dashboard" class="hidden">
+    <div class="card">
+      <h2>Dashboard Pengelola</h2>
+      <p id="welcome"></p>
+      <p class="muted">
+        Hanya guru dan operator dengan akun terdaftar
+        yang dapat mengakses data laporan.
+      </p>
+      <button type="button" id="refresh">Muat Ulang Laporan</button>
+      <button type="button" id="logout" class="danger">Logout</button>
+      <p id="dashboardMessage" role="status"></p>
+    </div>
+
+    <div class="stats">
+      <div class="stat">Total laporan<strong id="total">0</strong></div>
+      <div class="stat">Laporan baru<strong id="newCount">0</strong></div>
+      <div class="stat">Diproses<strong id="processCount">0</strong></div>
+      <div class="stat">Selesai<strong id="doneCount">0</strong></div>
+    </div>
+
+    <div class="card">
+      <h2>Daftar Laporan Masuk</h2>
+      <label for="filterStatus">Filter status</label>
+      <select id="filterStatus">
+        <option value="Semua">Semua laporan</option>
+        <option value="Baru">Baru</option>
+        <option value="Sedang Diproses">Sedang Diproses</option>
+        <option value="Selesai">Selesai</option>
+      </select>
+      <div id="reportList">Memuat laporan...</div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Sistem Laporan Fasilitas Sekolah · Proyek TKJ/TJKT
+</footer>
+
+<script type="module">
+  import { initializeApp } from
+    "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import {
+    getAuth, signInWithEmailAndPassword,
+    onAuthStateChanged, signOut
+  } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+  import {
+    getFirestore, collection, addDoc, getDocs,
+    doc, getDoc, updateDoc, serverTimestamp,
+    query, orderBy
+  } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+  // GANTI konfigurasi ini dengan milik proyek Firebase kamu.
+  const firebaseConfig = {
+    apiKey: "ISI_API_KEY",
+    authDomain: "ISI_PROJECT_ID.firebaseapp.com",
+    projectId: "ISI_PROJECT_ID",
+    storageBucket: "ISI_PROJECT_ID.firebasestorage.app",
+    messagingSenderId: "ISI_SENDER_ID",
+    appId: "ISI_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const $ = id => document.getElementById(id);
+  let currentRole = null;
+  let reports = [];
+
+  function showPage(page) {
+    ["studentPage", "loginPage", "dashboard"].forEach(id => {
+      $(id).classList.toggle("hidden", id !== page);
+    });
+  }
+
+  $("showReport").addEventListener("click", () => {
+    showPage("studentPage");
+  });
+
+  $("showLogin").addEventListener("click", () => {
+    showPage(auth.currentUser && currentRole
+      ? "dashboard" : "loginPage");
+  });
+
+  function message(id, text) {
+    $(id).textContent = text;
+  }
+
+  // SISWA MENGIRIM LAPORAN
+  $("reportForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const button = $("submitReport");
+    button.disabled = true;
+    message("message", "Mengirim laporan...");
+
+    try {
+      await addDoc(collection(db, "reports"), {
+        studentName: $("studentName").value.trim(),
+        studentClass: $("studentClass").value.trim(),
+        facility: $("facility").value,
+        location: $("location").value.trim(),
+        description: $("description").value.trim(),
+        status: "Baru",
+        createdAt: serverTimestamp()
+      });
+
+      $("reportForm").reset();
+      message("message", "Laporan berhasil dikirim. Terima kasih!");
+    } catch (error) {
+      console.error(error);
+      message("message",
+        "Laporan gagal dikirim. Periksa koneksi dan konfigurasi Firebase.");
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  // LOGIN PENGELOLA
+  $("loginForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    message("loginMessage", "Memeriksa akun...");
+
+    try {
+      await signInWithEmailAndPassword(
+        auth, $("email").value.trim(), $("password").value
+      );
+      // Dashboard ditampilkan oleh onAuthStateChanged.
+    } catch (error) {
+      console.error(error);
+      message("loginMessage",
+        "Login gagal. Periksa email dan kata sandi akun.");
+    }
+  });
+
+  // PERIKSA PERAN AKUN DARI DATABASE
+  onAuthStateChanged(auth, async user => {
+    currentRole = null;
+
+    if (!user) {
+      showPage("studentPage");
+      return;
+    }
+
+    try {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const role = userDoc.exists() ? userDoc.data().role : null;
+
+      if (!["guru", "operator"].includes(role)) {
+        await signOut(auth);
+        showPage("loginPage");
+        message("loginMessage",
+          "Akun belum diberi izin sebagai guru atau operator.");
+        return;
+      }
+
+      currentRole = role;
+      showPage("dashboard");
+      message("welcome",
+        "Login sebagai: " + role + " (" + user.email + ")");
+      await loadReports();
+    } catch (error) {
+      console.error(error);
+      await signOut(auth);
+      showPage("loginPage");
+      message("loginMessage",
+        "Tidak dapat memeriksa hak akses. Periksa pengaturan database.");
+    }
+  });
+
+  // MEMBACA LAPORAN DARI DATABASE
+  async function loadReports() {
+    if (!currentRole) return;
+
+    message("dashboardMessage", "Memuat laporan...");
+
+    try {
+      const q = query(
+        collection(db, "reports"),
+        orderBy("createdAt", "desc")
+      );
+      const snapshot = await getDocs(q);
+
+      reports = snapshot.docs.map(item => ({
+        id: item.id,
+        ...item.data()
+      }));
+
+      $("total").textContent = reports.length;
+      $("newCount").textContent =
+        reports.filter(r => r.status === "Baru").length;
+      $("processCount").textContent =
+        reports.filter(r => r.status === "Sedang Diproses").length;
+      $("doneCount").textContent =
+        reports.filter(r => r.status === "Selesai").length;
+
+      renderReports();
+      message("dashboardMessage", "Laporan berhasil dimuat.");
+    } catch (error) {
+      console.error(error);
+      message("dashboardMessage",
+        "Gagal memuat laporan. Periksa koneksi dan aturan keamanan.");
+    }
+  }
+
+  // MENAMPILKAN DAFTAR LAPORAN
+  function renderReports() {
+    const list = $("reportList");
+    list.replaceChildren();
+
+    const filter = $("filterStatus").value;
+    const visible = reports.filter(r =>
+      filter === "Semua" || r.status === filter
+    );
+
+    if (visible.length === 0) {
+      list.textContent = "Belum ada laporan pada kategori ini.";
+      return;
+    }
+
+    visible.forEach(r => {
+      const card = document.createElement("article");
+      card.className = "report";
+
+      const title = document.createElement("h3");
+      title.textContent = r.facility || "Fasilitas";
+      card.append(title);
+
+      const details = [
+        "Pelapor: " + (r.studentName || "-"),
+        "Kelas: " + (r.studentClass || "-"),
+        "Lokasi: " + (r.location || "-"),
+        "Deskripsi: " + (r.description || "-"),
+        "Status: " + (r.status || "Baru"),
+        "Tanggal: " + (
+          r.createdAt?.toDate
+            ? r.createdAt.toDate().toLocaleString("id-ID")
+            : "Belum tersedia"
+        )
+      ];
+
+      details.forEach(text => {
+        const p = document.createElement("p");
+        p.textContent = text;
+        card.append(p);
+      });
+
+      const label = document.createElement("label");
+      label.textContent = "Ubah status laporan";
+      const select = document.createElement("select");
+
+      ["Baru", "Sedang Diproses", "Selesai"].forEach(status => {
+        const option = document.createElement("option");
+        option.value = status;
+        option.textContent = status;
+        select.append(option);
+      });
+
+      select.value = r.status || "Baru";
+      select.disabled = !currentRole;
+      label.append(select);
+      card.append(label);
+
+      const save = document.createElement("button");
+      save.type = "button";
+      save.textContent = "Simpan Status";
+      save.style.marginTop = "12px";
+
+      save.addEventListener("click", async () => {
+        save.disabled = true;
+        try {
+          await updateDoc(doc(db, "reports", r.id), {
+            status: select.value
+          });
+          message("dashboardMessage", "Status laporan diperbarui.");
+          await loadReports();
+        } catch (error) {
+          console.error(error);
+          message("dashboardMessage",
+            "Gagal memperbarui status. Periksa hak akses.");
+        } finally {
+          save.disabled = false;
+        }
+      });
+
+      card.append(save);
+      list.append(card);
+    });
+  }
+
+  $("filterStatus").addEventListener("change", renderReports);
+  $("refresh").addEventListener("click", loadReports);
+
+  $("logout").addEventListener("click", async () => {
+    await signOut(auth);
+    currentRole = null;
+    reports = [];
+    showPage("studentPage");
+  });
+</script>
+</body>
+</html>
+
